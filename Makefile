@@ -1,3 +1,8 @@
+ifeq ($(PREFIX),)
+    PREFIX := /usr/local
+endif
+
+
 build:
 	go build -o bin/copycat main.go colors.go commands.go util.go
 run:
@@ -17,3 +22,7 @@ download:
 
 configure:
 	go run main.go colors.go commands.go util.go configure
+
+install:
+	install -d $(DESTDIR)$(PREFIX)/lib/
+	install -m 755 bin/copycat $(DESTDIR)$(PREFIX)/bin/
