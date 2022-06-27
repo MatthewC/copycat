@@ -7,7 +7,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println(Warn("At least one arguments are needed"))
+		fmt.Println(Warn("At least one argument is needed"))
 		help()
 		os.Exit(1)
 	}
@@ -31,6 +31,10 @@ func main() {
 		upload(name)
 	case "help":
 		help()
+	case "-v":
+		fmt.Println(OK("v1.0"))
+	case "--version":
+		fmt.Println(OK("v1.0"))
 	default:
 		fmt.Println(Warn("Not a valid option."))
 		help()
