@@ -5,10 +5,12 @@ import (
 	"os"
 )
 
+const version string = "1.1"
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println(Warn("At least one argument is needed"))
-		help()
+		help(false)
 		os.Exit(1)
 	}
 
@@ -18,7 +20,7 @@ func main() {
 	case "configure":
 		configure()
 	case "list":
-		list()
+		list(true)
 	case "download":
 		twoArgs(args)
 
@@ -29,15 +31,17 @@ func main() {
 
 		name := args[1]
 		upload(name)
+	case "files":
+		files(args[1:])
 	case "help":
-		help()
+		help(false)
 	case "-v":
-		fmt.Println(OK("v1.0"))
+		fmt.Println(OK("v" + version))
 	case "--version":
-		fmt.Println(OK("v1.0"))
+		fmt.Println(OK("v" + version))
 	default:
 		fmt.Println(Warn("Not a valid option."))
-		help()
+		help(false)
 	}
 
 }
@@ -45,7 +49,7 @@ func main() {
 func twoArgs(args []string) {
 	if len(args) != 2 {
 		fmt.Println(Warn("At least two arguments are needed"))
-		help()
+		help(false)
 		os.Exit(1)
 	}
 }

@@ -31,6 +31,8 @@ func createClient(host string, key string, secret string) *minio.Client {
 		Secure: useSSL,
 	})
 	if err != nil {
+		fmt.Println(Fata("FAILED!"))
+
 		log.Fatalln(err)
 	}
 
@@ -60,6 +62,7 @@ func getClient() *minio.Client {
 
 	if !configExists(home) {
 		fmt.Println("Configuration does not exist. Run " + Info("copycat configure") + " to create configuration file.")
+		os.Exit(1)
 	}
 
 	godotenv.Load(home + "/.config/.copycat")
@@ -106,4 +109,11 @@ func createConfig(host string, key string, secret string, path string) {
 		log.Fatal(err)
 		return
 	}
+}
+
+func uploadFile(minioClient *minio.Client, objectName string, filePath string, contentType string) error {
+
+	_, err := minioClient.FPutObject(context.Background(), "copycat-env", objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
+
+	return err
 }

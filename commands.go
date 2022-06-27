@@ -129,7 +129,7 @@ func configure() {
 	fmt.Println("\nRun " + OK("copycat help") + " to see a list of available commands!")
 }
 
-func list() {
+func list(print bool) []string {
 	minioClient := getClient()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -138,18 +138,27 @@ func list() {
 
 	objectCh := minioClient.ListObjects(ctx, "copycat-env", minio.ListObjectsOptions{
 		Prefix:    "env_",
-		Recursive: true,
+		Recursive: false,
 	})
 
-	fmt.Println(White("Environments:"))
+	if print {
+		fmt.Println(White("Environments:"))
+	}
+
+	var env []string
 
 	for object := range objectCh {
 		if object.Err != nil {
 			fmt.Println(object.Err)
-			return
+			return env
 		}
-		fmt.Println(Teal(strings.Replace(object.Key, "env_", "", 1)))
+		if print {
+			fmt.Println(Teal(strings.Replace(object.Key, "env_", "", 1)))
+		}
+		env = append(env, strings.Replace(object.Key, "env_", "", 1))
 	}
+
+	return env
 }
 
 func download(key string) {
@@ -191,8 +200,8 @@ func upload(key string) {
 	filePath := "./.env"
 	contentType := "text/plain"
 
-	// Upload the zip file with FPutObject
-	_, err := minioClient.FPutObject(context.Background(), "copycat-env", objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
+	// Upload the env file.
+	err := uploadFile(minioClient, objectName, filePath, contentType)
 	if err != nil {
 		fmt.Println(Fata("FAILED!"))
 		log.Fatalln(err)
@@ -201,12 +210,21 @@ func upload(key string) {
 	fmt.Println(OK("DONE!"))
 }
 
-func help() {
-	fmt.Println(White("CopyCat Client\n"))
-
-	fmt.Println("Usage:")
-	fmt.Println("	copycat help")
-	fmt.Println("	copycat list")
-	fmt.Println("	copycat download <environment>")
-	fmt.Println("	copycat upload <environment>")
+func help(files bool) {
+	if !files {
+		fmt.Println(White("CopyCat Client\n"))
+		fmt.Println("Usage:")
+		fmt.Println("	copycat help")
+		fmt.Println("	copycat list")
+		fmt.Println("	copycat download <environment>")
+		fmt.Println("	copycat upload <environment>")
+		fmt.Println("	copycat files help")
+	} else {
+		fmt.Println(Teal("CopyCat File System"))
+		fmt.Println("	copycat files help")
+		fmt.Println("	copycat files list")
+		fmt.Println("	copycat files <environment> list")
+		fmt.Println("	copycat files <environment> upload <file name> <upload name>")
+		fmt.Println("	copycat files <environment> download <file name>")
+	}
 }
