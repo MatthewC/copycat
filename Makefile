@@ -2,7 +2,6 @@ ifeq ($(PREFIX),)
     PREFIX := /usr/local
 endif
 
-
 build:
 	go build -o bin/copycat *.go
 

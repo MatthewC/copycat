@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -43,6 +44,12 @@ func handleEnv(env string, options []string) {
 	switch options[0] {
 	case "list":
 		listFiles(env)
+	case "upload":
+		requireArgs(options, 1, false, true)
+		fileUpload(env, options[1:])
+	case "download":
+		requireArgs(options, 1, false, true)
+		fileDownload(env, options[1:])
 	}
 }
 
@@ -64,4 +71,65 @@ func listFiles(env string) {
 		}
 		fmt.Println(object)
 	}
+}
+
+func fileUpload(env string, args []string) {
+	minioClient := getClient()
+
+	ensureBucket(minioClient)
+
+	uploadName := args[0]
+
+	if len(args) == 2 {
+		uploadName = args[1]
+	}
+
+	fmt.Print(Teal("Uploading " + args[0] + " as " + uploadName + " under environment " + env + "... "))
+
+	objectName := env + "_uploads/" + uploadName
+	filePath := args[0]
+	contentType := "text/plain"
+
+	// Upload the env file.
+	err := uploadFile(minioClient, objectName, filePath, contentType)
+	if err != nil {
+		fmt.Println(Fata("FAILED!"))
+		log.Fatalln(err)
+	}
+
+	fmt.Println(OK("DONE!"))
+}
+
+func fileDownload(env string, args []string) {
+	minioClient := getClient()
+
+	ensureBucket(minioClient)
+
+	dlName := args[0]
+
+	if len(args) == 2 {
+		dlName = args[1]
+	}
+
+	fmt.Print(Teal("Download " + args[0] + " from environment " + env + " as " + dlName + "... "))
+
+	object, err := minioClient.GetObject(context.Background(), "copycat-env", env+"_uploads/"+args[0], minio.GetObjectOptions{})
+	if err != nil {
+		fmt.Println(Fata("FAILED!"))
+		fmt.Println(err)
+		return
+	}
+	localFile, err := os.Create("./" + dlName)
+	if err != nil {
+		fmt.Println(Fata("FAILED!"))
+		fmt.Println(err)
+		return
+	}
+	if _, err = io.Copy(localFile, object); err != nil {
+		fmt.Println(Fata("FAILED!"))
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(OK("DONE!"))
 }

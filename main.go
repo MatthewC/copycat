@@ -22,12 +22,12 @@ func main() {
 	case "list":
 		list(true)
 	case "download":
-		twoArgs(args)
+		requireArgs(args, 2, true, false)
 
 		name := args[1]
 		download(name)
 	case "upload":
-		twoArgs(args)
+		requireArgs(args, 2, true, false)
 
 		name := args[1]
 		upload(name)
@@ -44,12 +44,4 @@ func main() {
 		help(false)
 	}
 
-}
-
-func twoArgs(args []string) {
-	if len(args) != 2 {
-		fmt.Println(Warn("At least two arguments are needed"))
-		help(false)
-		os.Exit(1)
-	}
 }

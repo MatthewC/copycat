@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -116,4 +117,12 @@ func uploadFile(minioClient *minio.Client, objectName string, filePath string, c
 	_, err := minioClient.FPutObject(context.Background(), "copycat-env", objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
 
 	return err
+}
+
+func requireArgs(args []string, count int, strict bool, files bool) {
+	if (strict && len(args) != count) || len(args) < count {
+		fmt.Println(Warn("Expected " + strconv.Itoa(count) + " argument(s), got " + strconv.Itoa(len(args))))
+		help(files)
+		os.Exit(1)
+	}
 }

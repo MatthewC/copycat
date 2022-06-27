@@ -224,7 +224,7 @@ func help(files bool) {
 		fmt.Println("	copycat files help")
 		fmt.Println("	copycat files list")
 		fmt.Println("	copycat files <environment> list")
-		fmt.Println("	copycat files <environment> upload <file name> <upload name>")
-		fmt.Println("	copycat files <environment> download <file name>")
+		fmt.Println("	copycat files <environment> upload <file name> [upload name]")
+		fmt.Println("	copycat files <environment> download <file name> [download name]")
 	}
 }
