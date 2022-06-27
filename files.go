@@ -30,7 +30,7 @@ func validEnv(env string, options []string) {
 	envs := list(false)
 
 	for _, e := range envs {
-		if e == env || env == "sample" {
+		if e == env {
 			handleEnv(env, options)
 			return
 		}

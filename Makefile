@@ -4,29 +4,14 @@ endif
 
 
 build:
-	go build -o bin/copycat main.go colors.go commands.go util.go files.go
+	go build -o bin/copycat *.go
 
 run:
-	go run main.go colors.go commands.go util.go files.go default
-
-help:
-	go run main.go colors.go commands.go util.go files.go help
-
-list:
-	go run main.go colors.go commands.go util.go files.go list
-
-upload:
-	go run main.go colors.go commands.go util.go files.go upload sample
-
-download:
-	go run main.go colors.go commands.go util.go files.go download sample
-
-configure:
-	go run main.go colors.go commands.go util.go files.go configure
-
-files:
-	go run main.go colors.go commands.go util.go files.go files
+	go run *.go $(CMD)
 
 install:
 	install -d $(DESTDIR)$(PREFIX)/lib/
 	install -m 755 bin/copycat $(DESTDIR)$(PREFIX)/bin/
+
+clean:
+	rm -fr bin/
