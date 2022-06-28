@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const version string = "1.2"
+const version string = "v1.3"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -36,9 +36,9 @@ func main() {
 	case "help":
 		help(false)
 	case "version", "-v", "--version":
-		fmt.Println(OK("v" + version))
+		fmt.Println(OK(version))
 	case "version-clean":
-		fmt.Println("v" + version)
+		fmt.Println(version)
 	case "update":
 		update()
 	default:
