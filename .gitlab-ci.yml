@@ -14,13 +14,14 @@ Build:
     paths:
       - bin
 
-upload:
+Upload:
   stage: upload
   image:
     name: minio/mc
     entrypoint: ['']
   needs:
-    artifacts: true
+    - job: Build
+      artifacts: true
   before_script:
     - mc alias set minio $MINIO_HOST $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
   script:
