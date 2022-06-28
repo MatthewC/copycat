@@ -52,7 +52,7 @@ func configure() {
 		fmt.Println(Warn("EXISTS!"))
 
 		// Ask if they want to overwrite configuartion
-		fmt.Print(Info("Delete existing configuration [Y\\n]? "))
+		fmt.Print(Info("Delete existing configuration [Y/n]? "))
 		var confirm string
 		fmt.Scanln(&confirm)
 
@@ -166,7 +166,7 @@ func download(key string) {
 
 	ensureBucket(minioClient)
 
-	fmt.Print(Teal("Download " + key + " environment as .env... "))
+	fmt.Print(Teal("Downloading " + key + " environment as .env... "))
 
 	object, err := minioClient.GetObject(context.Background(), "copycat-env", "env_"+key, minio.GetObjectOptions{})
 	if err != nil {

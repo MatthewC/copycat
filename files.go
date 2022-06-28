@@ -111,14 +111,20 @@ func fileDownload(env string, args []string) {
 		dlName = args[1]
 	}
 
-	fmt.Print(Teal("Download " + args[0] + " from environment " + env + " as " + dlName + "... "))
+	fmt.Print(Teal("Downloading " + args[0] + " from environment " + env + " as " + dlName + "... "))
 
 	object, err := minioClient.GetObject(context.Background(), "copycat-env", env+"_uploads/"+args[0], minio.GetObjectOptions{})
-	if err != nil {
+	_, exists := object.Stat()
+	if err != nil || exists != nil {
 		fmt.Println(Fata("FAILED!"))
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(exists)
+		}
 		return
 	}
+
 	localFile, err := os.Create("./" + dlName)
 	if err != nil {
 		fmt.Println(Fata("FAILED!"))

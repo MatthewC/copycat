@@ -39,9 +39,10 @@ func main() {
 		fmt.Println(OK("v" + version))
 	case "--version":
 		fmt.Println(OK("v" + version))
+	case "update":
+		update()
 	default:
 		fmt.Println(Warn("Not a valid option."))
 		help(false)
 	}
-
 }

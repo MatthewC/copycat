@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -125,4 +126,39 @@ func requireArgs(args []string, count int, strict bool, files bool) {
 		help(files)
 		os.Exit(1)
 	}
+}
+
+func update() {
+	// Check if update exists to begin with.
+
+	// TODO
+
+	// Get path of where executable is installed.
+
+	fmt.Printf("Locating installation location... ")
+
+	ex, err := os.Executable()
+
+	if err != nil {
+		fmt.Println(Fata("FAILED!"))
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	fmt.Println(OK("FOUND!"))
+
+	installDir := filepath.Dir(ex)
+
+	// Confirm installation directory with user
+	var confirm string
+	fmt.Print("Confirm installation directory (" + installDir + ") [Y/n]: ")
+	fmt.Scanln(&confirm)
+
+	if confirm != "Y" && confirm != "y" {
+		fmt.Println(Fata("Aborting!"))
+		os.Exit(1)
+	}
+
+	// Download latest version of copycat
+
 }
