@@ -13,6 +13,7 @@ Build:
   artifacts:
     paths:
       - bin
+      - CURRENT_VERSION
 
 Upload:
   stage: upload
@@ -25,8 +26,9 @@ Upload:
   before_script:
     - mc alias set minio $MINIO_HOST $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
   script:
-    - mc cp bin/* minio/$MINIO_BUCKET/$CI_COMMIT_SHA/
+    - mc cp bin/* minio/$MINIO_BUCKET/$TAG_COMMIT/
     - mc cp bin/* minio/$MINIO_BUCKET/latest/
+    - mc cp CURRENT_VERSION minio/$MINIO_BUCKET/
 
 # Deploy:
 #   stage: deploy

@@ -14,7 +14,7 @@ build-all:
 	GOOS=windows GOARCH=amd64 go build -o bin/copycat-windows-amd64.exe *.go
 	GOOS=windows GOARCH=arm64 go build -o bin/copycat-windows-arm64.exe *.go
 	GOOS=windows GOARCH=386 go build -o bin/copycat-windows-386.exe *.go
-
+	go run *.go version-clean > CURRENT_VERSION
 run:
 	go run *.go $(CMD)
 
@@ -24,3 +24,4 @@ install:
 
 clean:
 	rm -fr bin/
+	rm CURRENT_VERSION

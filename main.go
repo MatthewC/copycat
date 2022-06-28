@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const version string = "1.1"
+const version string = "1.2"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -35,10 +35,10 @@ func main() {
 		files(args[1:])
 	case "help":
 		help(false)
-	case "-v":
+	case "version", "-v", "--version":
 		fmt.Println(OK("v" + version))
-	case "--version":
-		fmt.Println(OK("v" + version))
+	case "version-clean":
+		fmt.Println("v" + version)
 	case "update":
 		update()
 	default:
