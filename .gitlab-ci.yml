@@ -1,0 +1,35 @@
+image: golang:latest
+
+stages:
+  # - test
+  - build
+  - upload
+  # - deploy
+
+Build:
+  stage: build
+  script:
+    - make build-all
+  artifacts:
+    paths:
+      - bin
+
+upload:
+  stage: upload
+  image:
+    name: minio/mc
+    entrypoint: ['']
+  needs:
+    artifacts: true
+  before_script:
+    - mc alias set minio $MINIO_HOST $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+  script:
+    - mc cp bin/* $CI_COMMIT_SHA/
+    - mc cp bin/* latest/
+
+# Deploy:
+#   stage: deploy
+#   release:
+#     tag_name: 'v1.$CI_PIPELINE_IID'
+#     description: 'v1.$CI_PIPELINE_IID'
+#     ref: '$CI_COMMIT_SHA'
