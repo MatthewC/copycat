@@ -25,8 +25,8 @@ Upload:
   before_script:
     - mc alias set minio $MINIO_HOST $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
   script:
-    - mc cp bin/* $CI_COMMIT_SHA/
-    - mc cp bin/* latest/
+    - mc cp bin/* minio/$MINIO_BUCKET/$CI_COMMIT_SHA/
+    - mc cp bin/* minio/$MINIO_BUCKET/latest/
 
 # Deploy:
 #   stage: deploy
