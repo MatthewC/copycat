@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/minio/minio-go/v7"
 )
@@ -61,15 +62,18 @@ func listFiles(env string) {
 	defer cancel()
 
 	objectCh := minioClient.ListObjects(ctx, "copycat-env", minio.ListObjectsOptions{
-		Prefix:    env + "/",
+		Prefix:    env + "_uploads/",
 		Recursive: false,
 	})
+
+	fmt.Println(White(env + "files:"))
+
 	for object := range objectCh {
 		if object.Err != nil {
 			fmt.Println(object.Err)
 			return
 		}
-		fmt.Println(object)
+		fmt.Println(Teal(strings.Replace(object.Key, env+"_uploads/", "", 1)))
 	}
 }
 
