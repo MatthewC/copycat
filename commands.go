@@ -1,3 +1,6 @@
+//go:build !windows
+// +build !windows
+
 package main
 
 import (
@@ -8,7 +11,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"syscall"
 
 	"github.com/minio/minio-go/v7"
 )
@@ -34,7 +36,14 @@ func configure() {
 
 		fmt.Printf("Creating .config folder (" + home + "/.config/)... ")
 
-		syscall.Umask(0)
+		// This would technically resolve a problem with creating directories in Linux, but
+		// since the command isn't available on Windows. Either don't build on windows, or
+		// figure out how to not use syscall.Umask.
+
+		// if runtime.GOOS != "windows" {
+		// 	defer syscall.Umask(syscall.Umask(0))
+		// }
+
 		configErr := os.Mkdir(home+"/.config/", 0644)
 
 		if configErr != nil {
