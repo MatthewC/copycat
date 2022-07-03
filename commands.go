@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"syscall"
 
 	"github.com/minio/minio-go/v7"
 )
@@ -33,6 +34,7 @@ func configure() {
 
 		fmt.Printf("Creating .config folder (" + home + "/.config/)... ")
 
+		syscall.Umask(0)
 		configErr := os.Mkdir(home+"/.config/", 0644)
 
 		if configErr != nil {
