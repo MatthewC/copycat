@@ -41,7 +41,7 @@ func configure() {
 		// figure out how to not use syscall.Umask.
 
 		// if runtime.GOOS != "windows" {
-		// 	defer syscall.Umask(syscall.Umask(0))
+		defer syscall.Umask(syscall.Umask(0))
 		// }
 
 		configErr := os.Mkdir(home+"/.config/", 0644)
