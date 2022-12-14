@@ -24,3 +24,4 @@ bin/
 go.work
 
 CURRENT_VERSION
+.env
