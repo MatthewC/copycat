@@ -90,6 +90,9 @@ func getClient() *minio.Client {
 }
 
 func checkHost(host string) error {
+	// TODO
+	// Currently, this forces the use of a MinIO host, an alternative method
+	// is needed to support either AWS or MinIO hosts.
 	reqURL := host + "/minio/health/live"
 
 	_, err := http.Get(reqURL)
@@ -146,7 +149,11 @@ func requireArgs(args []string, count int, strict bool, files bool) {
 }
 
 func getVersion() (string, error) {
-	resp, err := http.Get("https://s3.ghst.fr/copycat-releases/CURRENT_VERSION")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(Fata("Error loading .env file"))
+	}
+	resp, err := http.Get(os.Getenv(("VERSION_HOST")))
 
 	if err != nil {
 		return "", err
