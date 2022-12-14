@@ -153,7 +153,7 @@ func getVersion() (string, error) {
 	if err != nil {
 		log.Fatal(Fata("Error loading .env file"))
 	}
-	resp, err := http.Get(os.Getenv(("VERSION_HOST")))
+	resp, err := http.Get(os.Getenv(("VERSION_LOG")))
 
 	if err != nil {
 		return "", err
@@ -212,8 +212,14 @@ func update() {
 		os.Exit(1)
 	}
 
+	// Get environment variables
+	errEnv := godotenv.Load()
+	if errEnv != nil {
+		log.Fatal(Fata("Error loading .env file"))
+	}
+
 	// Download latest version of copycat
-	url := "https://s3.ghst.fr/copycat-releases/latest/copycat-" + runtime.GOOS + "-" + runtime.GOARCH
+	url := os.Getenv("VERSION_HOST") + runtime.GOOS + "-" + runtime.GOARCH
 
 	fmt.Print(Teal("Attempting to create temporary file... "))
 
