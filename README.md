@@ -15,7 +15,31 @@ to install the binary. There is a known issue with Windows that I haven't been a
 
 ## Usage
 
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### Create a new environment (uploads `.env` file)
+
+```shell
+copycat upload environment-name
+```
+
+### Re-download the newly created environment (downloads `.env` file)
+
+```shell
+copycat download environment-name
+```
+
+### Upload a new file (requires an existing environment)
+
+```shell
+copycat files environment-name upload secrets.txt aws_secrets.txt
+```
+
+The above command uploads the file `secrets.txt` and saves it as `aws_secrets.txt` under the environment name `environment-name`. Then you could use the following to re-download it:
+
+```shell
+copycat files environment-name download aws_secrets.txt new_secrets.txt
+```
+
+This would re-download that `aws_secrets.txt` file we uploaded before, and save it as `new_secrets.txt`.
 
 ## Support
 
