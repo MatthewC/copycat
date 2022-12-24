@@ -1,10 +1,12 @@
 # Copy Cat - Environment Manager
 
+![CopyCat Logo](https://cdn.hkr.sh/logo.png)
+
 CopyCat is a `.env` manager I used as an excuse to learn [Go](https://go.dev). You can configure it with your own MinIO (_pending S3 support_) instance to have .env files synced. The client is also capable of syncing any files to a specific environment, so that they can later be re-downloaded.
 
 ## Installation
 
-Asuming Go has already been installed, you should be able to run
+Assuming Go has already been installed, you should be able to run
 
 ```shell
 make build
