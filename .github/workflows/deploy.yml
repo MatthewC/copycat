@@ -35,6 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
+      - name: Download a single artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: copycat-release
       - name: Deploy to S3
         run: |
           old_version=$(cat CURRENT_VERSION)
