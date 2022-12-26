@@ -46,6 +46,8 @@ jobs:
           aws s3 mv ${{ secrets.AWS_ROOT_BUCKET }}/CURRENT_VERSION ${{ secrets.AWS_ROOT_BUCKET }}/${old_version}/
           aws s3 sync ./bin ${{ secrets.AWS_ROOT_BUCKET }}/latest/
           aws s3 cp CURRENT_VERSION ${{ secrets.AWS_ROOT_BUCKET }}/
+          aws s3api put-object-tagging --bucket ${{ secrets.AWS_BUCKET_NAME }} --key ${{ secrets.AWS_ROOT_PATH }}/CURRENT_VERSION --tagging ${{ secrets.AWS_OBJECT_TAGGING }}
+          aws s3api list-objects --bucket ${{ secrets.AWS_BUCKET_NAME }} --query 'Contents[].{Key:Key}' --prefix ${{ secrets.AWS_ROOT_PATH }}/latest --output text | xargs -n 1 aws s3api put-object-tagging  --bucket ${{ secrets.AWS_BUCKET_NAME }} --tagging ${{ secrets.AWS_OBJECT_TAGGING }} --key
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
