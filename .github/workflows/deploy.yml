@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-      - name: Download a single artifact
+      - name: Download copycat build
         uses: actions/download-artifact@v3
         with:
           name: copycat-release
@@ -43,8 +43,9 @@ jobs:
         run: |
           old_version=$(cat CURRENT_VERSION)
           aws s3 --recursive mv ${{ secrets.AWS_ROOT_BUCKET }}/latest/ ${{ secrets.AWS_ROOT_BUCKET }}/${old_version}/
+          aws s3 mv ${{ secrets.AWS_ROOT_BUCKET }}/CURRENT_VERSION ${{ secrets.AWS_ROOT_BUCKET }}/${old_version}/
           aws s3 sync ./bin ${{ secrets.AWS_ROOT_BUCKET }}/latest/
-          aws s3 sync CURRENT_VERSION ${{ secrets.AWS_ROOT_BUCKET }}/
+          aws s3 cp CURRENT_VERSION ${{ secrets.AWS_ROOT_BUCKET }}/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
