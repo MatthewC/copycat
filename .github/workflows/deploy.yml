@@ -16,6 +16,8 @@ jobs:
           DUMMY_HOST: ${{ secrets.TESTING_HOST }}
           DUMMY_KEY: ${{ secrets.TESTING_KEY }}
           DUMMY_SECRET: ${{ secrets.TESTING_SECRET }}
+          DUMMY_BUCKET: ${{ secrets.TESTING_BUCKET }}
+          DUMMY_REGION: ${{ secrets.TESTING_REGION }}
   build:
     runs-on: ubuntu-latest
     needs: [test]
