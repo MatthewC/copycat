@@ -58,5 +58,5 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          VERSION_LOG: ${{ DEPLOY_VERS_LOG }}
-          VERSION_HOST: ${{ DEPLOY_VERS_HOST }}
+          VERSION_LOG: ${{ secrets.DEPLOY_VERS_LOG }}
+          VERSION_HOST: ${{ secrets.DEPLOY_VERS_HOST }}
