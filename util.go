@@ -33,7 +33,7 @@ func handleError(err error, failed bool, exit bool) {
 	}
 }
 
-func createClient(host string, key string, secret string) *minio.Client {
+func createClient(host string, key string, secret string) (*minio.Client, error) {
 	useSSL := true
 	var endpoint string
 
@@ -50,12 +50,10 @@ func createClient(host string, key string, secret string) *minio.Client {
 		Secure: useSSL,
 	})
 	if err != nil {
-		fmt.Println(Fata("FAILED!"))
-
-		log.Fatalln(err)
+		return nil, err
 	}
 
-	return minioClient
+	return minioClient, nil
 }
 
 func configExists(home string) bool {
@@ -70,7 +68,7 @@ func configExists(home string) bool {
 	}
 }
 
-func getClient() *minio.Client {
+func getClient() (*minio.Client, string, error) {
 	// Get user's home directory
 	home, err := os.UserHomeDir()
 
@@ -86,7 +84,12 @@ func getClient() *minio.Client {
 
 	godotenv.Load(home + "/.config/.copycat")
 
-	return createClient(os.Getenv("HOSTNAME"), os.Getenv("KEY"), os.Getenv("SECRET"))
+	client, err := createClient(os.Getenv("HOSTNAME"), os.Getenv("KEY"), os.Getenv("SECRET"))
+	if err != nil {
+		return nil, "", fmt.Errorf("Error creating new client: %w", err)
+	}
+
+	return client, os.Getenv("BUCKET"), nil
 }
 
 func checkHost(host string) error {
@@ -100,8 +103,8 @@ func checkHost(host string) error {
 	return err
 }
 
-func ensureBucket(minioClient *minio.Client) error {
-	found, err := minioClient.BucketExists(context.Background(), "copycat-env")
+func ensureBucket(minioClient *minio.Client, bucket string) error {
+	found, err := minioClient.BucketExists(context.Background(), bucket)
 
 	if err != nil {
 		log.Fatal(err)
@@ -112,29 +115,32 @@ func ensureBucket(minioClient *minio.Client) error {
 		return nil
 	}
 
-	err = minioClient.MakeBucket(context.Background(), "copycat-env", minio.MakeBucketOptions{Region: "eu-west"})
+	// Uncomment for bucket creation if bucket does not exist
+	/*
+		err = minioClient.MakeBucket(context.Background(), bucket, minio.MakeBucketOptions{Region: "eu-west"})
+
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+	*/
+
+	return nil
+}
+
+func createConfig(host string, key string, secret string, bucket string, path string) error {
+	config := []byte("HOSTNAME=" + host + "\nKEY=" + key + "\nSECRET=" + secret + "\nBUCKET=" + bucket)
+
+	err := os.WriteFile(path+".copycat", config, 0644)
 
 	if err != nil {
-		log.Fatal(err)
-		return err
+		return fmt.Errorf("Error writing config file: %w", err)
 	}
 
 	return nil
 }
 
-func createConfig(host string, key string, secret string, path string) {
-	config := []byte("HOSTNAME=" + host + "\nKEY=" + key + "\nSECRET=" + secret + "\n")
-
-	err := os.WriteFile(path+".copycat", config, 0644)
-
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-}
-
 func uploadFile(minioClient *minio.Client, objectName string, filePath string, contentType string) error {
-
 	_, err := minioClient.FPutObject(context.Background(), "copycat-env", objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
 
 	return err
@@ -151,12 +157,12 @@ func requireArgs(args []string, count int, strict bool, files bool) {
 func getVersion() (string, error) {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(Fata("Error loading .env file"))
+		return "", fmt.Errorf("Couldn't load .env file: %w", err)
 	}
 	resp, err := http.Get(os.Getenv(("VERSION_LOG")))
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("HTTP error: %w", err)
 	}
 
 	response, err := io.ReadAll(resp.Body)

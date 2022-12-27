@@ -12,6 +12,10 @@ jobs:
           go-version: 1.19
       - name: Test CopyCat
         run: go test -v ./...
+        env:
+          DUMMY_HOST: ${{ secrets.TESTING_HOST }}
+          DUMMY_KEY: ${{ secrets.TESTING_KEY }}
+          DUMMY_SECRET: ${{ secrets.TESTING_SECRET }}
   build:
     runs-on: ubuntu-latest
     needs: [test]

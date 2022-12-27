@@ -23,5 +23,7 @@ bin/
 # Go workspace file
 go.work
 
+.vscode
+
 CURRENT_VERSION
 .env

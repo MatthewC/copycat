@@ -55,7 +55,11 @@ func handleEnv(env string, options []string) {
 }
 
 func listFiles(env string) {
-	minioClient := getClient()
+	minioClient, _, err := getClient()
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -78,9 +82,13 @@ func listFiles(env string) {
 }
 
 func fileUpload(env string, args []string) {
-	minioClient := getClient()
+	minioClient, bucket, err := getClient()
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
-	ensureBucket(minioClient)
+	ensureBucket(minioClient, bucket)
 
 	uploadName := args[0]
 
@@ -95,7 +103,7 @@ func fileUpload(env string, args []string) {
 	contentType := "text/plain"
 
 	// Upload the env file.
-	err := uploadFile(minioClient, objectName, filePath, contentType)
+	err = uploadFile(minioClient, objectName, filePath, contentType)
 	if err != nil {
 		fmt.Println(Fata("FAILED!"))
 		log.Fatalln(err)
@@ -105,9 +113,13 @@ func fileUpload(env string, args []string) {
 }
 
 func fileDownload(env string, args []string) {
-	minioClient := getClient()
+	minioClient, bucket, err := getClient()
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
-	ensureBucket(minioClient)
+	ensureBucket(minioClient, bucket)
 
 	dlName := args[0]
 

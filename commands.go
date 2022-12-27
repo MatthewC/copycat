@@ -113,15 +113,24 @@ func configure() {
 	fmt.Print(Info("SECRET: "))
 	fmt.Scanln(&password)
 
+	var bucket string
+	fmt.Print(Info("BUCKET: "))
+	fmt.Scanln(&bucket)
+
 	fmt.Printf("Attempting to connect... ")
 
-	minioClient := createClient(host, username, password)
+	minioClient, err := createClient(host, username, password)
+	if err != nil {
+		log.Println(Fata("FATAL!"))
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
 	fmt.Println(OK("DONE!"))
 
-	fmt.Printf("Ensuring copycat-env bucket exists... ")
+	fmt.Printf("Ensuring %s bucket exists... ", bucket)
 
-	if err = ensureBucket(minioClient); err != nil {
+	if err = ensureBucket(minioClient, bucket); err != nil {
 		fmt.Println(Fata("FAILED!"))
 		fmt.Println(err)
 		os.Exit(1)
@@ -131,7 +140,7 @@ func configure() {
 
 	fmt.Printf("Creating .copycat config... ")
 
-	createConfig(host, username, password, home+"/.config/")
+	createConfig(host, username, password, bucket, home+"/.config/")
 
 	fmt.Println(OK("DONE!"))
 
@@ -141,7 +150,11 @@ func configure() {
 }
 
 func list(print bool) []string {
-	minioClient := getClient()
+	minioClient, _, err := getClient()
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -173,9 +186,13 @@ func list(print bool) []string {
 }
 
 func download(key string) {
-	minioClient := getClient()
+	minioClient, bucket, err := getClient()
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
-	ensureBucket(minioClient)
+	ensureBucket(minioClient, bucket)
 
 	fmt.Print(Teal("Downloading " + key + " environment as .env... "))
 
@@ -201,9 +218,13 @@ func download(key string) {
 }
 
 func upload(key string) {
-	minioClient := getClient()
+	minioClient, bucket, err := getClient()
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
-	ensureBucket(minioClient)
+	ensureBucket(minioClient, bucket)
 
 	fmt.Print(Teal("Uploading .env with key " + key + "... "))
 
@@ -212,7 +233,7 @@ func upload(key string) {
 	contentType := "text/plain"
 
 	// Upload the env file.
-	err := uploadFile(minioClient, objectName, filePath, contentType)
+	err = uploadFile(minioClient, objectName, filePath, contentType)
 	if err != nil {
 		fmt.Println(Fata("FAILED!"))
 		log.Fatalln(err)
