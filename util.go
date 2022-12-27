@@ -73,7 +73,7 @@ func getClient() (*minio.Client, string, error) {
 	home, err := os.UserHomeDir()
 
 	if err != nil {
-		log.Fatal(Fata("A fatal error occured: "), err)
+		log.Fatal(Fata("A fatal error occurred: %w"), err)
 		os.Exit(1)
 	}
 
@@ -86,7 +86,7 @@ func getClient() (*minio.Client, string, error) {
 
 	client, err := createClient(os.Getenv("HOSTNAME"), os.Getenv("KEY"), os.Getenv("SECRET"))
 	if err != nil {
-		return nil, "", fmt.Errorf("Error creating new client: %w", err)
+		return nil, "", fmt.Errorf("error creating new client: %w", err)
 	}
 
 	return client, os.Getenv("BUCKET"), nil
@@ -134,7 +134,7 @@ func createConfig(host string, key string, secret string, bucket string, path st
 	err := os.WriteFile(path+".copycat", config, 0644)
 
 	if err != nil {
-		return fmt.Errorf("Error writing config file: %w", err)
+		return fmt.Errorf("error writing config file: %w", err)
 	}
 
 	return nil
@@ -157,7 +157,7 @@ func requireArgs(args []string, count int, strict bool, files bool) {
 func getVersion() (string, error) {
 	err := godotenv.Load()
 	if err != nil {
-		return "", fmt.Errorf("Couldn't load .env file: %w", err)
+		return "", fmt.Errorf("couldn't load .env file: %w", err)
 	}
 	resp, err := http.Get(os.Getenv(("VERSION_LOG")))
 
@@ -288,5 +288,5 @@ func update() {
 	_ = os.Remove(dir)
 
 	fmt.Println(OK("DONE!"))
-	fmt.Printf(Info("Succesfully wrote %d bytes to %s/copycat!\n"), bWritten, installDir)
+	fmt.Printf(Info("Successfully wrote %d bytes to %s/copycat!\n"), bWritten, installDir)
 }
