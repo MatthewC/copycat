@@ -3,7 +3,7 @@ ifeq ($(PREFIX),)
 endif
 
 build:
-	go build -o bin/copycat *.go
+	go build -o bin/copycat ./...
 
 build-all:
 	GOOS=linux GOARCH=amd64 go build -o bin/copycat-linux-amd64 ./...
@@ -14,9 +14,9 @@ build-all:
 	# GOOS=windows GOARCH=amd64 go build -o bin/copycat-windows-amd64.exe ./...
 	# GOOS=windows GOARCH=arm64 go build -o bin/copycat-windows-arm64.exe ./...
 	# GOOS=windows GOARCH=386 go build -o bin/copycat-windows-386.exe ./...
-	go run *.go version-clean > CURRENT_VERSION
+	go run ./... version-clean > CURRENT_VERSION
 run:
-	go run *.go $(CMD)
+	go run ./... $(CMD)
 
 install:
 	install -d $(DESTDIR)$(PREFIX)/lib/
