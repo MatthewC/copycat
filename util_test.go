@@ -14,7 +14,7 @@ import (
 
 func TestCreateClient(t *testing.T) {
 	err := godotenv.Load()
-	if err != nil {
+	if err != nil && os.Getenv("DUMMY_HOST") == "" {
 		t.Errorf(Fata("Error loading .env file"))
 		return
 	}
