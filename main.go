@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
-const version string = "v1.5"
+const version float64 = 1.5
+
+var VersionHost string
+var VersionLog string
 
 func main() {
 	if len(os.Args) < 2 {
@@ -24,10 +24,8 @@ func main() {
 	os.Setenv("COPYCAT_PROFILE", *profilePtr)
 
 	// Load environment variables
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		log.Fatal(Fata("Error loading .env file"))
-	}
+	os.Setenv("VERSION_LOG", VersionLog)
+	os.Setenv("VERSION_HOST", VersionHost)
 
 	args := flag.Args()
 
@@ -55,10 +53,10 @@ func main() {
 		help(false)
 
 	case "version", "-v", "--version":
-		fmt.Println(OK(version))
+		fmt.Printf(OK("v%f\n"), version)
 
 	case "version-clean":
-		fmt.Println(version)
+		fmt.Printf("%f\n", version)
 
 	case "update":
 		update()
