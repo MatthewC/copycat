@@ -22,6 +22,9 @@ install:
 	install -d $(DESTDIR)$(PREFIX)/lib/
 	install -m 755 bin/copycat $(DESTDIR)$(PREFIX)/bin/
 
+test:
+	go test -v ./...
+
 clean:
 	rm -fr bin/
 	rm CURRENT_VERSION
