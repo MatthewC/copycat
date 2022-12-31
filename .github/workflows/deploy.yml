@@ -31,7 +31,11 @@ jobs:
       - name: Build CopyCat
         run: |
           make build-all
-          go run ./... version-clean > CURRENT_VERSION
+        env:
+          VERSION_LOG: ${{ secrets.COPYCAT_VERSION_PATH }}
+          VERSION_HOST: ${{ secrets.COPYCAT_VERSION_HOST }}
+      - name: Set version tag
+        run: go run ./... version-clean > CURRENT_VERSION
       - name: Archive build
         uses: actions/upload-artifact@v3
         with:

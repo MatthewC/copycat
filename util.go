@@ -213,7 +213,7 @@ func update() {
 	}
 
 	// Download latest version of copycat
-	url := os.Getenv("VERSION_HOST") + runtime.GOOS + "-" + runtime.GOARCH
+	url := os.Getenv("VERSION_HOST") + "copycat-" + runtime.GOOS + "-" + runtime.GOARCH
 
 	fmt.Print(Teal("Attempting to create temporary file... "))
 
