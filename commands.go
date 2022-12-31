@@ -1,5 +1,3 @@
-//go:build !windows
-
 package main
 
 import (
@@ -16,14 +14,6 @@ import (
 
 func configure() {
 	fmt.Printf("Setting up COPYCAT Environment\n")
-
-	// This would technically resolve a problem with creating directories in Linux, but
-	// since the command isn't available on Windows. Either don't build on windows, or
-	// figure out how to not use syscall.Umask.
-
-	// if runtime.GOOS != "windows" {
-	// oldMask := syscall.Umask(0)
-	// }
 
 	// Get user's home directory
 	home, err := os.UserHomeDir()

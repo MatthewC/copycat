@@ -142,28 +142,24 @@ func requireArgs(args []string, count int, strict bool, files bool) {
 	}
 }
 
-func getVersion() (float64, error) {
+func getVersion() (string, error) {
 	resp, err := http.Get(os.Getenv(("VERSION_LOG")))
 
 	if err != nil {
-		return -1, fmt.Errorf("HTTP error: %w", err)
+		return "", fmt.Errorf("HTTP error: %w", err)
 	}
 
 	response, err := io.ReadAll(resp.Body)
 
 	// Ensure that file fetched actually has a version tag in it.
 	if err != nil || response[0] != 118 {
-		return -1, errors.New("file not fetched properly")
+		return "", errors.New("file not fetched properly")
 	}
 
 	// See if string starts with a "v" for legacy reasons.
 	hostVersion := string(response[:len(response)-1])
-	if hostVersion[0] == 'v' {
 
-		return strconv.ParseFloat(hostVersion[1:], 64)
-	}
-
-	return strconv.ParseFloat(hostVersion, 64)
+	return hostVersion, nil
 }
 
 func update() {
@@ -182,8 +178,6 @@ func update() {
 		fmt.Println(Teal("NONE!"))
 		fmt.Println(Warn("You already have the latest version: ") + OK(ver))
 		os.Exit(0)
-	} else if ver < version {
-		fmt.Println(Fata("ERROR?") + " You appear to have a future release")
 	}
 
 	fmt.Println(OK("FOUND! ") + Fata(version) + " -> " + OK(ver))

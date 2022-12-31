@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const version float64 = 1.5
+const version string = "v1.5.0"
 
 var VersionHost string
 var VersionLog string
@@ -53,10 +53,10 @@ func main() {
 		help(false)
 
 	case "version", "-v", "--version":
-		fmt.Printf(OK("v%f\n"), version)
+		fmt.Println(OK(version))
 
 	case "version-clean":
-		fmt.Printf("%f\n", version)
+		fmt.Println(version)
 
 	case "update":
 		update()
