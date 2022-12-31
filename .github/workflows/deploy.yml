@@ -1,5 +1,4 @@
 name: CI/CD
-run-name: Test, Build, and deploy binary
 on: [push]
 jobs:
   test:
@@ -21,6 +20,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: [test]
+    name: Build binaries
     steps:
       - name: Checkout
         uses: actions/checkout@v3
