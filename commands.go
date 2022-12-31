@@ -10,13 +10,20 @@ import (
 	"log"
 	"os"
 	"strings"
-	"syscall"
 
 	"github.com/minio/minio-go/v7"
 )
 
 func configure() {
 	fmt.Printf("Setting up COPYCAT Environment\n")
+
+	// This would technically resolve a problem with creating directories in Linux, but
+	// since the command isn't available on Windows. Either don't build on windows, or
+	// figure out how to not use syscall.Umask.
+
+	// if runtime.GOOS != "windows" {
+	// oldMask := syscall.Umask(0)
+	// }
 
 	// Get user's home directory
 	home, err := os.UserHomeDir()
@@ -36,23 +43,18 @@ func configure() {
 
 		fmt.Printf("Creating .config folder (" + home + "/.config/)... ")
 
-		// This would technically resolve a problem with creating directories in Linux, but
-		// since the command isn't available on Windows. Either don't build on windows, or
-		// figure out how to not use syscall.Umask.
-
-		// if runtime.GOOS != "windows" {
-		defer syscall.Umask(syscall.Umask(0))
-		// }
-
-		configErr := os.Mkdir(home+"/.config/", 0644)
+		newDir := home + "/.config/"
+		configErr := os.Mkdir(newDir, 0755)
 
 		if configErr != nil {
 			fmt.Println(Fata("FAILED"))
 
 			fmt.Println("Could not create .config directory: ", configErr)
+			os.Exit(1)
 		}
 
 		fmt.Println(OK("CREATED!"))
+		os.Chmod(newDir, 0755)
 	} else {
 		fmt.Println(OK("FOUND!"))
 	}
@@ -63,19 +65,23 @@ func configure() {
 		fmt.Println(Fata("NOT FOUND."))
 		fmt.Printf("Creating copycat folder (%s/.config/copycat)... ", home)
 
-		configErr := os.Mkdir(home+"/.config/copycat/", 0644)
+		newDir := home + "/.config/copycat/"
+		configErr := os.Mkdir(newDir, 0644)
 		if configErr != nil {
 			log.Fatalf("FAILED! See: %s", configErr)
 		} else {
 			fmt.Println(OK("CREATED!"))
+			os.Chmod(newDir, 0755)
 		}
 	} else {
 		fmt.Println(OK("FOUND!"))
 	}
 
 	// Check for existing .copycat configuration.
-	fmt.Printf("Checking for existing default .copycat configuration... ")
-	if _, err := os.Stat(home + "/.config/copycat/default"); err == nil {
+	fmt.Printf("Checking for existing copycat configuration (profile: %s)... ", os.Getenv("COPYCAT_PROFILE"))
+
+	profileDir := home + "/.config/copycat/" + os.Getenv("COPYCAT_PROFILE")
+	if _, err := os.Stat(profileDir); err == nil {
 		fmt.Println(Warn("EXISTS!"))
 
 		// Ask if they want to overwrite configuration
@@ -87,7 +93,7 @@ func configure() {
 			fmt.Print(Warn("Deleting existing configuration... "))
 
 			// Delete file, so we can overwrite it.
-			if e := os.Remove(home + "/.config/copycat/default"); e != nil {
+			if e := os.Remove(profileDir); e != nil {
 				fmt.Println(Fata("FAILED!"))
 			}
 
@@ -144,7 +150,7 @@ func configure() {
 
 	fmt.Printf("Creating .copycat config... ")
 
-	createConfig(host, username, password, bucket, home+"/.config/copycat/", "default")
+	createConfig(host, username, password, bucket, profileDir)
 
 	fmt.Println(OK("DONE!"))
 
@@ -154,7 +160,7 @@ func configure() {
 }
 
 func list(print bool) []string {
-	minioClient, _, err := getClient()
+	minioClient, bucket, err := getClient()
 	if err != nil {
 		log.Fatalln(err)
 		os.Exit(1)
@@ -164,7 +170,7 @@ func list(print bool) []string {
 
 	defer cancel()
 
-	objectCh := minioClient.ListObjects(ctx, "copycat-env", minio.ListObjectsOptions{
+	objectCh := minioClient.ListObjects(ctx, bucket, minio.ListObjectsOptions{
 		Prefix:    "env_",
 		Recursive: false,
 	})
@@ -174,6 +180,11 @@ func list(print bool) []string {
 	}
 
 	var env []string
+
+	if len(objectCh) == 0 {
+		fmt.Println("... " + Warn("Empty!"))
+		return env
+	}
 
 	for object := range objectCh {
 		if object.Err != nil {
@@ -200,7 +211,7 @@ func download(key string) {
 
 	fmt.Print(Teal("Downloading " + key + " environment as .env... "))
 
-	object, err := minioClient.GetObject(context.Background(), "copycat-env", "env_"+key, minio.GetObjectOptions{})
+	object, err := minioClient.GetObject(context.Background(), bucket, "env_"+key, minio.GetObjectOptions{})
 	if err != nil {
 		fmt.Println(Fata("FAILED!"))
 		fmt.Println(err)
@@ -249,24 +260,29 @@ func upload(key string) {
 func help(files bool) {
 	if !files {
 		fmt.Println(White("CopyCat Client\n"))
-		fmt.Println("Usage:")
-		fmt.Println("	copycat help")
-		fmt.Println("	copycat list")
-		fmt.Println("	copycat download <environment>")
-		fmt.Println("	copycat upload <environment>")
-		fmt.Println("	copycat files help")
+		fmt.Println("Usage: copycat [--profile] <command>")
+		fmt.Println("Commands:")
+		fmt.Println("	help")
+		fmt.Println("	list")
+		fmt.Println("	download <environment>")
+		fmt.Println("	upload <environment>")
+		fmt.Println("	files help")
+
+		fmt.Println("	")
 	} else {
 		fmt.Println(Teal("CopyCat File System"))
-		fmt.Println("	copycat files help")
-		fmt.Println("	copycat files list")
-		fmt.Println("	copycat files <environment> list")
-		fmt.Println("	copycat files <environment> upload <file name> [upload name]")
-		fmt.Println("	copycat files <environment> download <file name> [download name]")
+		fmt.Println("Usage: copycat [--profile] files <command>")
+		fmt.Println("Commands:")
+		fmt.Println("	help")
+		fmt.Println("	list")
+		fmt.Println("	<environment> list")
+		fmt.Println("	<environment> upload <file name> [upload name]")
+		fmt.Println("	<environment> download <file name> [download name]")
 	}
 }
 
 func reset() {
-	config, configExists := configExists()
+	config, configExists := configExists(os.Getenv("COPYCAT_PROFILE"))
 	if !configExists {
 		fmt.Println(Fata("Configuration does not exist."))
 		fmt.Println("Use " + Info("copycat configure") + " to set up your configuration.")

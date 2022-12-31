@@ -62,23 +62,20 @@ func configExists(profile string) (string, bool) {
 
 	if err != nil {
 		log.Fatal(Fata("A fatal error occurred: %w"), err)
-		os.Exit(1)
 	}
 
 	config := home + "/.config/copycat/" + profile
 	if _, err := os.Stat(config); err == nil {
 		return config, true
-	} else if errors.Is(err, os.ErrNotExist) {
-		return "", false
 	} else {
 		log.Fatal(err)
-		os.Exit(1)
-		return "", false
 	}
+	return "", false
 }
 
 func getClient() (*minio.Client, string, error) {
-	config, configExists := configExists("default")
+	config, configExists := configExists(os.Getenv("COPYCAT_PROFILE"))
+
 	if !configExists {
 		fmt.Println("Configuration does not exist. Run " + Info("copycat configure") + " to create configuration file.")
 		os.Exit(1)
@@ -119,10 +116,10 @@ func ensureBucket(minioClient *minio.Client, bucket string) error {
 	return nil
 }
 
-func createConfig(host string, key string, secret string, bucket string, path string, profile string) error {
+func createConfig(host string, key string, secret string, bucket string, path string) error {
 	config := []byte("HOSTNAME=" + host + "\nKEY=" + key + "\nSECRET=" + secret + "\nBUCKET=" + bucket)
 
-	err := os.WriteFile(path+profile, config, 0644)
+	err := os.WriteFile(path, config, 0644)
 
 	if err != nil {
 		return fmt.Errorf("error writing config file: %w", err)
@@ -146,10 +143,6 @@ func requireArgs(args []string, count int, strict bool, files bool) {
 }
 
 func getVersion() (string, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return "", fmt.Errorf("couldn't load .env file: %w", err)
-	}
 	resp, err := http.Get(os.Getenv(("VERSION_LOG")))
 
 	if err != nil {
@@ -207,12 +200,6 @@ func update() {
 	if confirm != "Y" && confirm != "y" {
 		fmt.Println(Fata("Aborting!"))
 		os.Exit(1)
-	}
-
-	// Get environment variables
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		log.Fatal(Fata("Error loading .env file"))
 	}
 
 	// Download latest version of copycat

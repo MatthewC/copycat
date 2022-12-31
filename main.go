@@ -1,8 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 const version string = "v1.5"
@@ -14,7 +18,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	args := os.Args[1:]
+	// Get default profile, unless profile is explicitly defined.
+	profilePtr := flag.String("profile", "default", "profile to be used")
+	flag.Parse()
+	os.Setenv("COPYCAT_PROFILE", *profilePtr)
+
+	// Load environment variables
+	errEnv := godotenv.Load()
+	if errEnv != nil {
+		log.Fatal(Fata("Error loading .env file"))
+	}
+
+	args := flag.Args()
 
 	switch args[0] {
 	case "configure":

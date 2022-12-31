@@ -55,7 +55,7 @@ func handleEnv(env string, options []string) {
 }
 
 func listFiles(env string) {
-	minioClient, _, err := getClient()
+	minioClient, bucket, err := getClient()
 	if err != nil {
 		log.Fatalln(err)
 		os.Exit(1)
@@ -65,12 +65,17 @@ func listFiles(env string) {
 
 	defer cancel()
 
-	objectCh := minioClient.ListObjects(ctx, "copycat-env", minio.ListObjectsOptions{
+	objectCh := minioClient.ListObjects(ctx, bucket, minio.ListObjectsOptions{
 		Prefix:    env + "_uploads/",
 		Recursive: false,
 	})
 
 	fmt.Println(White(env + "files:"))
+
+	if len(objectCh) == 0 {
+		fmt.Println("... " + Warn("Empty!"))
+		return
+	}
 
 	for object := range objectCh {
 		if object.Err != nil {
@@ -103,7 +108,7 @@ func fileUpload(env string, args []string) {
 	contentType := "text/plain"
 
 	// Upload the env file.
-	err = uploadFile(minioClient, objectName, filePath, contentType)
+	err = uploadFile(minioClient, objectName, filePath, contentType, bucket)
 	if err != nil {
 		fmt.Println(Fata("FAILED!"))
 		log.Fatalln(err)
@@ -129,7 +134,7 @@ func fileDownload(env string, args []string) {
 
 	fmt.Print(Teal("Downloading " + args[0] + " from environment " + env + " as " + dlName + "... "))
 
-	object, err := minioClient.GetObject(context.Background(), "copycat-env", env+"_uploads/"+args[0], minio.GetObjectOptions{})
+	object, err := minioClient.GetObject(context.Background(), bucket, env+"_uploads/"+args[0], minio.GetObjectOptions{})
 	_, exists := object.Stat()
 	if err != nil || exists != nil {
 		fmt.Println(Fata("FAILED!"))
