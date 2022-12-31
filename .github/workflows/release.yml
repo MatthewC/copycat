@@ -1,0 +1,43 @@
+name: Create release
+on:
+  push:
+    tags:
+      - "v*"
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for build to succeed
+        uses: lewagon/wait-on-check-action@v1.2.0
+        with:
+          ref: ${{ github.ref }}
+          check-name: "Build binaries"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 120
+      - name: Download copycat build
+        uses: actions/download-artifact@v3
+        with:
+          name: copycat-release
+      - name: Set version
+        run: echo "::set-output name=version::$(cat CURRENT_VERSION)"
+        id: version
+      - name: Create release (latest)
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: "Development Build"
+          files: |
+            LICENSE.md
+            ./bin/*
+      - name: Create release (version specific)
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{ GITHUB_REF }}
+          prerelease: false
+          title: "Development Build"
+          files: |
+            LICENSE.md
+            ./bin/*
