@@ -13,14 +13,11 @@ jobs:
           ref: ${{ github.ref }}
           check-name: "Build binaries"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 120
+          wait-interval: 300
       - name: Download copycat build
         uses: actions/download-artifact@v3
         with:
           name: copycat-release
-      - name: Set version
-        run: echo "::set-output name=version::$(cat CURRENT_VERSION)"
-        id: version
       - name: Create release (latest)
         uses: marvinpinto/action-automatic-releases@latest
         with:
