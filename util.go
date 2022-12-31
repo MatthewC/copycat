@@ -56,19 +56,7 @@ func createClient(host string, key string, secret string) (*minio.Client, error)
 	return minioClient, nil
 }
 
-func configExists(home string) bool {
-	if _, err := os.Stat(home + "/.config/.copycat"); err == nil {
-		return true
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false
-	} else {
-		log.Fatal(err)
-		os.Exit(1)
-		return false
-	}
-}
-
-func getClient() (*minio.Client, string, error) {
+func configExists(profile string) (string, bool) {
 	// Get user's home directory
 	home, err := os.UserHomeDir()
 
@@ -77,12 +65,26 @@ func getClient() (*minio.Client, string, error) {
 		os.Exit(1)
 	}
 
-	if !configExists(home) {
+	config := home + "/.config/copycat/" + profile
+	if _, err := os.Stat(config); err == nil {
+		return config, true
+	} else if errors.Is(err, os.ErrNotExist) {
+		return "", false
+	} else {
+		log.Fatal(err)
+		os.Exit(1)
+		return "", false
+	}
+}
+
+func getClient() (*minio.Client, string, error) {
+	config, configExists := configExists("default")
+	if !configExists {
 		fmt.Println("Configuration does not exist. Run " + Info("copycat configure") + " to create configuration file.")
 		os.Exit(1)
 	}
 
-	godotenv.Load(home + "/.config/.copycat")
+	godotenv.Load(config)
 
 	client, err := createClient(os.Getenv("HOSTNAME"), os.Getenv("KEY"), os.Getenv("SECRET"))
 	if err != nil {
@@ -90,17 +92,6 @@ func getClient() (*minio.Client, string, error) {
 	}
 
 	return client, os.Getenv("BUCKET"), nil
-}
-
-func checkHost(host string) error {
-	// TODO
-	// Currently, this forces the use of a MinIO host, an alternative method
-	// is needed to support either AWS or MinIO hosts.
-	reqURL := host + "/minio/health/live"
-
-	_, err := http.Get(reqURL)
-
-	return err
 }
 
 func ensureBucket(minioClient *minio.Client, bucket string) error {
@@ -128,10 +119,10 @@ func ensureBucket(minioClient *minio.Client, bucket string) error {
 	return nil
 }
 
-func createConfig(host string, key string, secret string, bucket string, path string) error {
+func createConfig(host string, key string, secret string, bucket string, path string, profile string) error {
 	config := []byte("HOSTNAME=" + host + "\nKEY=" + key + "\nSECRET=" + secret + "\nBUCKET=" + bucket)
 
-	err := os.WriteFile(path+".copycat", config, 0644)
+	err := os.WriteFile(path+profile, config, 0644)
 
 	if err != nil {
 		return fmt.Errorf("error writing config file: %w", err)
@@ -140,8 +131,8 @@ func createConfig(host string, key string, secret string, bucket string, path st
 	return nil
 }
 
-func uploadFile(minioClient *minio.Client, objectName string, filePath string, contentType string) error {
-	_, err := minioClient.FPutObject(context.Background(), "copycat-env", objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
+func uploadFile(minioClient *minio.Client, objectName string, filePath string, contentType string, bucket string) error {
+	_, err := minioClient.FPutObject(context.Background(), bucket, objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
 
 	return err
 }

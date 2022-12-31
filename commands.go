@@ -22,7 +22,7 @@ func configure() {
 	home, err := os.UserHomeDir()
 
 	if err != nil {
-		fmt.Println(Fata("A fatal error occured: "), err)
+		fmt.Println(Fata("A fatal error occurred: "), err)
 		os.Exit(1)
 	}
 
@@ -57,12 +57,28 @@ func configure() {
 		fmt.Println(OK("FOUND!"))
 	}
 
+	fmt.Printf("Checking for copycat folder... ")
+	_, folderErr = os.Stat(home + "/.config/copycat/")
+	if folderErr != nil {
+		fmt.Println(Fata("NOT FOUND."))
+		fmt.Printf("Creating copycat folder (%s/.config/copycat)... ", home)
+
+		configErr := os.Mkdir(home+"/.config/copycat/", 0644)
+		if configErr != nil {
+			log.Fatalf("FAILED! See: %s", configErr)
+		} else {
+			fmt.Println(OK("CREATED!"))
+		}
+	} else {
+		fmt.Println(OK("FOUND!"))
+	}
+
 	// Check for existing .copycat configuration.
-	fmt.Printf("Checking for existing .copycat configuration... ")
-	if _, err := os.Stat(home + "/.config/.copycat"); err == nil {
+	fmt.Printf("Checking for existing default .copycat configuration... ")
+	if _, err := os.Stat(home + "/.config/copycat/default"); err == nil {
 		fmt.Println(Warn("EXISTS!"))
 
-		// Ask if they want to overwrite configuartion
+		// Ask if they want to overwrite configuration
 		fmt.Print(Info("Delete existing configuration [Y/n]? "))
 		var confirm string
 		fmt.Scanln(&confirm)
@@ -71,7 +87,7 @@ func configure() {
 			fmt.Print(Warn("Deleting existing configuration... "))
 
 			// Delete file, so we can overwrite it.
-			if e := os.Remove(home + "/.config/.copycat"); e != nil {
+			if e := os.Remove(home + "/.config/copycat/default"); e != nil {
 				fmt.Println(Fata("FAILED!"))
 			}
 
@@ -92,18 +108,8 @@ func configure() {
 	fmt.Println("\nConnection Details:")
 
 	var host string
-	fmt.Print(Info("Hostname (e.g., https://google.com): "))
+	fmt.Print(Info("Hostname (e.g., https://s3.amazonaws.com): "))
 	fmt.Scanln(&host)
-
-	fmt.Printf("Connecting to host... ")
-
-	if err := checkHost(host); err != nil {
-		fmt.Println(Fata("FAILED!"))
-		fmt.Println(err)
-		os.Exit(1)
-	} else {
-		fmt.Println(OK("CONNECTED!"))
-	}
 
 	var username string
 	fmt.Print(Info("KEY: "))
@@ -125,22 +131,20 @@ func configure() {
 		log.Fatalln(err)
 		os.Exit(1)
 	}
-
 	fmt.Println(OK("DONE!"))
 
-	fmt.Printf("Ensuring %s bucket exists... ", bucket)
+	fmt.Printf("Ensuring \"%s\" bucket exists... ", bucket)
 
 	if err = ensureBucket(minioClient, bucket); err != nil {
 		fmt.Println(Fata("FAILED!"))
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
 	fmt.Println(OK("DONE!"))
 
 	fmt.Printf("Creating .copycat config... ")
 
-	createConfig(host, username, password, bucket, home+"/.config/")
+	createConfig(host, username, password, bucket, home+"/.config/copycat/", "default")
 
 	fmt.Println(OK("DONE!"))
 
@@ -233,7 +237,7 @@ func upload(key string) {
 	contentType := "text/plain"
 
 	// Upload the env file.
-	err = uploadFile(minioClient, objectName, filePath, contentType)
+	err = uploadFile(minioClient, objectName, filePath, contentType, bucket)
 	if err != nil {
 		fmt.Println(Fata("FAILED!"))
 		log.Fatalln(err)
@@ -259,4 +263,29 @@ func help(files bool) {
 		fmt.Println("	copycat files <environment> upload <file name> [upload name]")
 		fmt.Println("	copycat files <environment> download <file name> [download name]")
 	}
+}
+
+func reset() {
+	config, configExists := configExists()
+	if !configExists {
+		fmt.Println(Fata("Configuration does not exist."))
+		fmt.Println("Use " + Info("copycat configure") + " to set up your configuration.")
+		os.Exit(1)
+	}
+
+	// Prompt for user confirmation
+	var prompt string
+	fmt.Print(Warn("Are you sure you want to delete your configuration [Y/n]? "))
+	fmt.Scanln(&prompt)
+
+	if prompt == "N" || prompt == "n" {
+		log.Fatalln(Fata("Canceled"))
+	}
+
+	// Delete the config file
+	err := os.Remove(config)
+	if err != nil {
+		log.Fatalf("Failed to delete .copycat; see: %s\n", err)
+	}
+	fmt.Println(OK("Permanently deleted configuration file."))
 }
