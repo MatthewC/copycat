@@ -16,7 +16,8 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-// Used for internal error handling, as the code can become quite repetitive.
+// Used for internal error handling, as the code for error handling can become
+// quite repetitive.
 func handleError(err error, failed bool, exit bool) {
 	if err != nil {
 
