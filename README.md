@@ -4,7 +4,7 @@
 
 [![CI/CD](https://github.com/MatthewC/copycat/actions/workflows/deploy.yml/badge.svg)](https://github.com/MatthewC/copycat/actions/workflows/deploy.yml)
 
-CopyCat is a `.env` manager I used as an excuse to learn [Go](https://go.dev). You can configure it with your own MinIO (_pending S3 support_) instance to have .env files synced. The client is also capable of syncing any files to a specific environment, so that they can later be re-downloaded.
+CopyCat is a `.env` manager I used as an excuse to learn [Go](https://go.dev). You can configure it with your own S3-compliant instance to have .env files synced. The client is also capable of syncing any files to a specific environment, so that they can later be re-downloaded.
 
 ## Installation
 
