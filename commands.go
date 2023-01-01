@@ -15,6 +15,10 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
+// Handles setting up the CopyCat environment, prompting to
+// overwrite the existing configuration if previously called. Requires no
+// arguments, nor does it return anything. Will create ~/.config/ directory
+// if it does not exist.
 func configure() {
 	fmt.Printf("Setting up COPYCAT Environment\n")
 
@@ -152,6 +156,9 @@ func configure() {
 	fmt.Println("\nRun " + OK("copycat help") + " to see a list of available commands!")
 }
 
+// Returns the environments which have been created.
+// Takes in a single bool "print" which describes whether it will print
+// the environments found as a side-effect.
 func list(print bool) []string {
 	minioClient, bucket, err := getClient()
 	if err != nil {
@@ -193,6 +200,9 @@ func list(print bool) []string {
 	return env
 }
 
+// Given an environment (key), fetches the .env corresponding to that
+// environment and downloads it as ".env". Terminates program if environment
+// doesn't exist.
 func download(key string) {
 	minioClient, bucket, err := getClient()
 	if err != nil {
@@ -225,6 +235,7 @@ func download(key string) {
 	fmt.Println(OK("DONE!"))
 }
 
+// Creates a new environment and uploads the corresponding ".env" file.
 func upload(key string) {
 	minioClient, bucket, err := getClient()
 	if err != nil {
@@ -250,10 +261,11 @@ func upload(key string) {
 	fmt.Println(OK("DONE!"))
 }
 
+// Prints all of CopyCat's functions to standard output.
 func help(files bool) {
 	if !files {
 		fmt.Println(White("CopyCat Client\n"))
-		fmt.Println("Usage: copycat [--profile] <command>")
+		fmt.Println("Usage: copycat [--profile <name>] <command>")
 		fmt.Println("Commands:")
 		fmt.Println("	help")
 		fmt.Println("	list")
@@ -274,6 +286,8 @@ func help(files bool) {
 	}
 }
 
+// Handles main update routine, which involves checking if a newer version
+// has been released, and replacing the CopyCat binary.
 func update() {
 	fmt.Print("Checking if update exists... ")
 
@@ -385,6 +399,7 @@ func update() {
 	fmt.Printf(Info("Successfully wrote %d bytes to %s/copycat!\n"), bWritten, installDir)
 }
 
+// Deletes the specified configuration.
 func reset() {
 	config, configExists := configExists(os.Getenv("COPYCAT_PROFILE"))
 	if !configExists {

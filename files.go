@@ -11,6 +11,8 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
+// Main files entrypoint. Given an array of arguments, handles calling the
+// appropriate sub-function.
 func files(args []string) {
 	if len(args) < 1 {
 		fmt.Println(Warn("At least one argument is needed"))
@@ -28,6 +30,7 @@ func files(args []string) {
 	}
 }
 
+// Checks if an environment exists. Terminates the program if it doesn't.
 func validEnv(env string, options []string) {
 	envs := list(false)
 
@@ -41,6 +44,8 @@ func validEnv(env string, options []string) {
 	log.Fatalln(Fata("Environment not found. Use ") + Teal("copycat files list") + Fata(" to view a list of valid environments."))
 }
 
+// Depending on the option provided, and an environment, call the
+// appropriate sub-function.
 func handleEnv(env string, options []string) {
 	switch options[0] {
 	case "list":
@@ -54,6 +59,7 @@ func handleEnv(env string, options []string) {
 	}
 }
 
+// Given an environment, list all the files in that environment.
 func listFiles(env string) {
 	minioClient, bucket, err := getClient()
 	if err != nil {
@@ -86,6 +92,11 @@ func listFiles(env string) {
 	}
 }
 
+// Given an environment, and an array which may contain the following:
+//   - 0: file to upload
+//   - 1: upload name
+//
+// upload the specified file.
 func fileUpload(env string, args []string) {
 	minioClient, bucket, err := getClient()
 	if err != nil {
@@ -117,6 +128,11 @@ func fileUpload(env string, args []string) {
 	fmt.Println(OK("DONE!"))
 }
 
+// Given an environment, and an array which may contain the following:
+//   - 0: file to download
+//   - 1: download name
+//
+// download the specified file.
 func fileDownload(env string, args []string) {
 	minioClient, bucket, err := getClient()
 	if err != nil {
