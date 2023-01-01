@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-// Taken from:
+// Modified/taken from:
 // https://gist.github.com/ik5/d8ecde700972d4378d87?permalink_comment_id=3074524#gistcomment-3074524
 
 var (
