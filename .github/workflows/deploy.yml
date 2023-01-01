@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     name: Deploy CopyCat
-    if: needs.conditional_check.outputs.src_changed == 'True'
+    if: ${{ needs.conditional_check.outputs.src_changed }} == 'True'
     steps:
       - name: Download copycat build
         uses: actions/download-artifact@v3
