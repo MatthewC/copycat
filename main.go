@@ -74,6 +74,7 @@ func main() {
 
 	args := flag.Args()
 
+	// Case on passed arguments
 	switch args[0] {
 	case "configure":
 		configure()
