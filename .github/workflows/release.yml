@@ -10,10 +10,13 @@ jobs:
           ref: master
           check-name: "Build binaries"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 300
+          wait-interval: 10
       - name: Download copycat build
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: deploy.yml
+          workflow_conclusion: success
+
           name: copycat-release
       - name: Create release (latest)
         uses: marvinpinto/action-automatic-releases@latest
