@@ -17,10 +17,31 @@ jobs:
           DUMMY_SECRET: ${{ secrets.TESTING_SECRET }}
           DUMMY_BUCKET: ${{ secrets.TESTING_BUCKET }}
           DUMMY_REGION: ${{ secrets.TESTING_REGION }}
+  conditional_check:
+    runs-on: ubuntu-latest
+    outputs:
+      src_changed: ${{ steps.check_file_changed.outputs.src_changed }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Check for source file changes
+        shell: pwsh
+        id: check_file_changed
+        run: |
+          # Diff HEAD with the previous commit
+          $diff = git diff --name-only HEAD^ HEAD
+
+          # Check if a go file has changed (added, modified, deleted)
+          $SourceDiff = $diff | Where-Object { $_ -match '.go$' }
+          $HasDiff = $SourceDiff.Length -gt 0
+
+          Write-Host "::set-output name=src_changed::$HasDiff"
   build:
     runs-on: ubuntu-latest
     needs: [test]
     name: Build binaries
+    if: needs.conditional_check.outputs.src_changed == 'True'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -46,6 +67,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [build]
+    if: needs.conditional_check.outputs.src_changed == 'True'
     steps:
       - name: Download copycat build
         uses: actions/download-artifact@v3
