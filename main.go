@@ -98,7 +98,7 @@ func main() {
 	case "help":
 		help(false)
 
-	case "version", "-v", "--version":
+	case "version":
 		fmt.Println(OK(version))
 
 	case "version-clean":
