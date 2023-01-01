@@ -18,7 +18,7 @@ import (
 // Handles setting up the CopyCat environment, prompting to
 // overwrite the existing configuration if previously called. Requires no
 // arguments, nor does it return anything. Will create ~/.config/ directory
-// if it does not exist.
+// if it does not exist. Will also create the copycat directory.
 func configure() {
 	fmt.Printf("Setting up COPYCAT Environment\n")
 
