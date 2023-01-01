@@ -44,7 +44,7 @@ func validEnv(env string, options []string) {
 	log.Fatalln(Fata("Environment not found. Use ") + Teal("copycat files list") + Fata(" to view a list of valid environments."))
 }
 
-// Depending on the option provided, and an environment, call the
+// Depending on the options provided, and an environment, call the
 // appropriate sub-function.
 func handleEnv(env string, options []string) {
 	switch options[0] {
