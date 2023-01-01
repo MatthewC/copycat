@@ -1,17 +1,13 @@
 name: Create release
-on: [push]
+on:
+  push:
+    tags:
+      - "v*"
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for build to succeed
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          ref: main
-          check-name: "Build binaries"
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-      - name: Download copycat build
+      - name: Download latest copycat build
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: deploy.yml

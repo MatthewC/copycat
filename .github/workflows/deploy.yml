@@ -3,6 +3,7 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
+    name: Test CopyCat
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -19,6 +20,7 @@ jobs:
           DUMMY_REGION: ${{ secrets.TESTING_REGION }}
   conditional_check:
     runs-on: ubuntu-latest
+    name: Conditional check
     outputs:
       src_changed: ${{ steps.check_file_changed.outputs.src_changed }}
     steps:
@@ -67,6 +69,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [build]
+    name: Deploy CopyCat
     if: needs.conditional_check.outputs.src_changed == 'True'
     steps:
       - name: Download copycat build
